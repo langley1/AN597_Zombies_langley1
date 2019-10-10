@@ -232,7 +232,7 @@ hist(years_of_education, freq= FALSE) #Not a normal distribution
 
 Creating my subset
 ```{r}
-set.seed(1)
+set.seed(1) #using set.seed so that every time you run this function you'll get the same sample of numbers
 n <- 30 # size of the sample
 s <- zombies[sample(nrow(zombies), n, replace = FALSE),] #If i don't use nrow(zombies), then R gives back an error that it "can't take a sample larger than the population when replace= False"
 s
@@ -260,19 +260,19 @@ Finding the standard deviations of each variable
 ```{r}
 #We can use the built in function sd() because there are from a sample not a population 
 sd_height<- sd(s$height)
-sd_height #3.707
+sd_height #3.735
 
 sd_weight<- sd(s$weight)
-sd_weight #15.258
+sd_weight #16.22658
 
 sd_age<- sd(s$age)
-sd_age #2.772
+sd_age #2.960
 
 sd_zombieskilled<- sd(s$zombies_killed)
-sd_zombieskilled #1.660
+sd_zombieskilled #1.680
 
 sd_YOE<- sd(s$years_of_education)
-sd_YOE #1.826
+sd_YOE #1.6914
 ```
 
 Finding standard error for each variable
@@ -281,19 +281,19 @@ install.packages("sciplot") #This package has the built in function se() for sta
 library(sciplot)
 
 se_height<- se(s$height)
-se_height #0.677
+se_height #0.6819
 
 se_weight<- se(s$weight)
-se_weight #2.786
+se_weight #2.9625
 
 se_age<- se(s$age)
-se_age #0.506
+se_age #0.540
 
 se_zombieskilled<- se(s$zombies_killed)
-se_zombieskilled #0.303
+se_zombieskilled #0.3067
 
 se_YOE<- se(s$years_of_education)
-se_YOE #0.333
+se_YOE #0.30881
 ```
 
 Constructing 95% CI for the means of variables normally distributed
@@ -301,17 +301,17 @@ Constructing 95% CI for the means of variables normally distributed
 upper_height <- s_height_mean + qnorm(0.950, mean=0, sd=1)*se_height
 lower_height <- s_height_mean + qnorm(0.050, mean=0, sd=1)*se_height
 ci_height <- c(lower_height,upper_height)
-ci_height #66.85414, 69.08086
+ci_height #65.76356, 68.00688
 
 upper_weight <- s_weight_mean + qnorm(0.950, mean=0, sd=1)*se_weight
 lower_weight <- s_weight_mean + qnorm(0.050, mean=0, sd=1)*se_weight
 ci_weight <- c(lower_weight,upper_weight)
-ci_weight #142.4288, 151.5928
+ci_weight #137.3807, 147.1266
 
 upper_age <- s_age_mean + qnorm(0.950, mean=0, sd=1)*se_age
 lower_age <- s_age_mean + qnorm(0.050, mean=0, sd=1)*se_age
 ci_age <- c(lower_age,upper_age)
-ci_age #18.95740, 20.62226
+ci_age #18.79751, 20.57562
 ```
 
 Constructing 95& CI for variables not normally distributed
@@ -330,7 +330,7 @@ Bmean_ZK <- function(s_zombieskilled, indices) {
 results_ZK <- boot(data=s_zombieskilled, statistic=Bmean_ZK, R=1000)
 plot(results_ZK) #Now it looks on the histogram and Q-Q plot that this variable has a more normal distribution
 boot.ci(results_ZK, type=c("norm", "basic", "perc", "bca")) 
-#95% CI = 2.363, 3.515
+#95% CI = 2.366, 3.519
 
 #For Years of Education
 s_YOE<- s$years_of_education
@@ -343,7 +343,7 @@ Bmean_YOE <- function(s_YOE, indices) {
 results_YOE <- boot(data=s_YOE, statistic=Bmean_YOE, R=1000)
 plot(results_YOE) #Now it looks on the histogram and Q-Q plot that this variable has a more normal distribution
 boot.ci(results_YOE, type=c("norm", "basic", "perc", "bca")) 
-#95% CI = 2.273, 3.530
+#95% CI = 2.352, 3.580
 ```
 
 #QUESTION 6:
@@ -427,29 +427,35 @@ new_sd_YOE<- sd(s2[[1]]$years_of_education)
 new_sd_YOE #1.676543
 ```
 
+Plotting the different varibales from my new 99 samples to see their distribution
+```{r}
+qqnorm(s2[[1]]$weight)
+qqline(s2[[1]]$weight) #normal dist
 
+qqnorm(s2[[1]]$age)
+qqline(s2[[1]]$age) #normal dist
 
+qqnorm(s2[[1]]$height)
+qqline(s2[[1]]$height) #normal dist
 
+qqnorm(s2[[1]]$zombies_killed) #Still not normally distributed...
+qqline(s2[[1]]$zombies_killed)
 
-
-
-
-
-
-
-Bmean_height <- function(, indices) {
-      d2 <- s2$height[indices] # allows boot to select sample 
-      return(mean(d2))
-}
-
-mean(s2[[34]]$height)
-
-m <- NULL
-for (i in 1:k){
-    m[i] <- mean(s2[[1]]$weight)
-}
-mean(m)
-
-
+qqnorm(s2[[1]]$years_of_education) #Still not normally distributed...
+qqline(s2[[1]]$years_of_education)
 ```
+
+
+#My challenges
+
+1. Question 6 --> So I feel decently confident with how to pulled out my 99 samples using bootstrapping but then I didn't know if the way I calculated the means of each of the variables was right (See lines 368-376). Then I had no idea how to add in the means for each variable from the first sample that we made earlier on in the hw to get the total of 100 means (I don't think how I did it is right). Lastly, how do you get the standard deviations of a mean value.. R kept giving me an "NA" so I just did standard deviations of the entire variable (not the mean). Basically, this whole problem just confused me.
+2. Question 5 --> I wasn't sure how to set up the code for calculating CI for the variables with non-normal distribution so that took some fiddling, but after some onling searching I think I got it
+3. For some reason, I can't knit my Rmd. I keep getting an error about the "sciplot" package download even though it downloaded totally fine when I used it in Question 5
+4. Other than that, I think I got everything else decently ok!
+
+
+
+
+
+
 
