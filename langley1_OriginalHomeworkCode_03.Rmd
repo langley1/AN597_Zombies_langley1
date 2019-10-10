@@ -232,31 +232,224 @@ hist(years_of_education, freq= FALSE) #Not a normal distribution
 
 Creating my subset
 ```{r}
+set.seed(1)
 n <- 30 # size of the sample
-s <- zombies[sample(nrow(zombies), n, replace = FALSE),]
+s <- zombies[sample(nrow(zombies), n, replace = FALSE),] #If i don't use nrow(zombies), then R gives back an error that it "can't take a sample larger than the population when replace= False"
 s
 ```
 
 Finding the sample means of each variable
 ```{r}
 s_height_mean<- mean(s$height)
-s_height_mean #67.9675
+s_height_mean #66.88522
 
 s_weight_mean<- mean(s$weight)
-s_weight_mean #147.0108
+s_weight_mean #142.2536
 
 s_age_mean<- mean(s$age)
-s_age_mean #19.78983
+s_age_mean #19.68657
 
 s_zombieskilled_mean<- mean(s$zombies_killed)
-s_zombieskilled_mean #2.9333
+s_zombieskilled_mean #3.0666
 
 s_YOE_mean<- mean(s$years_of_education)
-s_YOE_mean #2.9
+s_YOE_mean #2.9666
 ```
 
 Finding the standard deviations of each variable
 ```{r}
+#We can use the built in function sd() because there are from a sample not a population 
+sd_height<- sd(s$height)
+sd_height #3.707
+
+sd_weight<- sd(s$weight)
+sd_weight #15.258
+
+sd_age<- sd(s$age)
+sd_age #2.772
+
+sd_zombieskilled<- sd(s$zombies_killed)
+sd_zombieskilled #1.660
+
+sd_YOE<- sd(s$years_of_education)
+sd_YOE #1.826
+```
+
+Finding standard error for each variable
+```{r}
+install.packages("sciplot") #This package has the built in function se() for standard error
+library(sciplot)
+
+se_height<- se(s$height)
+se_height #0.677
+
+se_weight<- se(s$weight)
+se_weight #2.786
+
+se_age<- se(s$age)
+se_age #0.506
+
+se_zombieskilled<- se(s$zombies_killed)
+se_zombieskilled #0.303
+
+se_YOE<- se(s$years_of_education)
+se_YOE #0.333
+```
+
+Constructing 95% CI for the means of variables normally distributed
+```{r}
+upper_height <- s_height_mean + qnorm(0.950, mean=0, sd=1)*se_height
+lower_height <- s_height_mean + qnorm(0.050, mean=0, sd=1)*se_height
+ci_height <- c(lower_height,upper_height)
+ci_height #66.85414, 69.08086
+
+upper_weight <- s_weight_mean + qnorm(0.950, mean=0, sd=1)*se_weight
+lower_weight <- s_weight_mean + qnorm(0.050, mean=0, sd=1)*se_weight
+ci_weight <- c(lower_weight,upper_weight)
+ci_weight #142.4288, 151.5928
+
+upper_age <- s_age_mean + qnorm(0.950, mean=0, sd=1)*se_age
+lower_age <- s_age_mean + qnorm(0.050, mean=0, sd=1)*se_age
+ci_age <- c(lower_age,upper_age)
+ci_age #18.95740, 20.62226
+```
+
+Constructing 95& CI for variables not normally distributed
+```{r}
+#Since they are not normally distributed, we need to use bootstrapping
+library(boot)
+
+#For Zombies Killed
+s_zombieskilled<- s$zombies_killed #First I am making a new variable for the # of zombies killed from our sample of 30 that we made before 
+
+Bmean_ZK <- function(s_zombieskilled, indices) {
+      d <- s_zombieskilled[indices] # allows boot to select sample 
+      return(mean(d))
+      } 
+
+results_ZK <- boot(data=s_zombieskilled, statistic=Bmean_ZK, R=1000)
+plot(results_ZK) #Now it looks on the histogram and Q-Q plot that this variable has a more normal distribution
+boot.ci(results_ZK, type=c("norm", "basic", "perc", "bca")) 
+#95% CI = 2.363, 3.515
+
+#For Years of Education
+s_YOE<- s$years_of_education
+
+Bmean_YOE <- function(s_YOE, indices) {
+      d <- s_YOE[indices] # allows boot to select sample 
+      return(mean(d))
+} 
+
+results_YOE <- boot(data=s_YOE, statistic=Bmean_YOE, R=1000)
+plot(results_YOE) #Now it looks on the histogram and Q-Q plot that this variable has a more normal distribution
+boot.ci(results_YOE, type=c("norm", "basic", "perc", "bca")) 
+#95% CI = 2.273, 3.530
+```
+
+#QUESTION 6:
+
+>Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+
+Drawing 99 random samples
+```{r}
+set.seed(2)
+k <- 99 # number of samples
+n <- 30 # size of each sample
+s2 <- NULL # dummy variable to hold each sample
+for (i in 1:k){
+    s2[[i]] <- sample(zombies,size=n, replace=TRUE) #I think we have to set replace to TRUE because     30 x 99= 2970 and "zombies" df only has 1000 rows
+}
+summary(s2)
+head(s2)
+```
+
+Trying to calculate the mean of each variable
+```{r}
+a<- mean(s2[[1]]$weight)
+mean(s2[[2]]$weight)
+mean(s2[[3]]$weight) #143.9075
+#Hmmm, they are all the same, I wasn't expecting them to all be the same and I'm not sure why they are but I'm rolling with it! There also seems to be a weight.1, weight.2, and weight.3 variable as well but all of them return the same mean of 143.9075
+
+b<- mean(s2[[1]]$age) #20.04696
+c<- mean(s2[[1]]$height) #67.6301
+d<- mean(s2[[1]]$zombies_killed) #2.992
+e<- mean(s2[[1]]$years_of_education) #2.996
+```
+
+Now adding these new means with the mean from my first sample I drew before to find my new OVERALL mean
+```{r}
+#for weight
+v<- c(a,s_weight_mean)
+v
+new_weight_mean<- mean(v)
+new_weight_mean #143.0806
+
+#for age
+w<- c(b,s_age_mean)
+w
+new_age_mean<- mean(w)
+new_age_mean #19.86678
+
+#for height
+x<- c(c,s_height_mean)
+x
+new_height_mean<- mean(x)
+new_height_mean #67.25766
+
+#for zombies killed
+y<- c(d,s_zombieskilled_mean)
+y
+new_ZK_mean<- mean(y)
+new_ZK_mean #3.02933
+
+#for Years of Education
+z<- c(e,s_YOE_mean)
+z
+new_YOE_mean<- mean(z)
+new_YOE_mean #2.98133
+```
+
+Finding the new standard deviations
+```{r}
+new_sd_weight<- sd(s2[[1]]$weight) #Wait is this supposed to be SD of means?? it returns back a NA when I try to do sd(new_age_mean)
+new_sd_weight #18.40106
+
+new_sd_age<- sd(s2[[1]]$age)
+new_sd_age #2.965066
+
+new_sd_height<- sd(s2[[1]]$height)
+new_sd_height #4.310126
+
+new_sd_ZK<- sd(s2[[1]]$zombies_killed)
+new_sd_ZK #1.748426
+
+new_sd_YOE<- sd(s2[[1]]$years_of_education)
+new_sd_YOE #1.676543
+```
+
+
+
+
+
+
+
+
+
+
+
+Bmean_height <- function(, indices) {
+      d2 <- s2$height[indices] # allows boot to select sample 
+      return(mean(d2))
+}
+
+mean(s2[[34]]$height)
+
+m <- NULL
+for (i in 1:k){
+    m[i] <- mean(s2[[1]]$weight)
+}
+mean(m)
+
 
 ```
 
