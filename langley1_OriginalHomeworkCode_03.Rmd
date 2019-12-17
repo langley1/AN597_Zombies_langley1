@@ -3,7 +3,7 @@ title: "Homework 3"
 output: html_document
 ---
 
-This is my code for Homework 3: Zombies
+# Homework 3: Zombies
 
 First I need to inport the zombies data file from the online repo, and I'll be doing this using curl
 ```{r}
@@ -11,12 +11,11 @@ library(curl)
 Z<- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/zombies.csv")
 zombies<- read.csv(Z, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 head(zombies)
-tail(zombies)
 ```
 
-#QUESTION 1:
+### QUESTION 1:
 
->Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples
+> Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples
 
 This is for variable HEIGHT
 ```{r}
@@ -26,7 +25,6 @@ height_mean #67.6301
 
 #Finding the population variance for height using function(): population variance = sum of squares/ N
 height<- zombies$height
-height
 height_pop_v <- function(height){sum((height-mean(height))^2)/(length(height))}
 height_pop_v(height) #18.5587
 
@@ -43,7 +41,6 @@ weight_mean #143.9075
 
 #Finding the population variance for weight using function(): population variance = sum of squares/ N
 weight<- zombies$weight
-weight
 weight_pop_v <- function(weight){sum((weight-mean(weight))^2)/(length(weight))}
 weight_pop_v(weight) #338.2604
 
@@ -60,7 +57,6 @@ age_mean #20.0470
 
 #Finding the population variance for age using function(): population variance = sum of squares/ N
 age<- zombies$age
-age
 age_pop_v <- function(age){sum((age-mean(age))^2)/(length(age))}
 age_pop_v(age) #8.7828
 
@@ -77,7 +73,6 @@ zombies_killed_mean #2.992
 
 #Finding the population variance for zombies_killed using function(): population variance = sum of squares/ N
 zombies_killed<- zombies$zombies_killed
-zombies_killed
 zombies_killed_pop_v <- function(zombies_killed){sum((zombies_killed-mean(zombies_killed))^2)/(length(zombies_killed))}
 zombies_killed_pop_v(zombies_killed) #3.0539
 
@@ -94,7 +89,6 @@ YOE_mean #2.996
 
 #Finding the population variance for years_of_education using function(): population variance = sum of squares/ N
 YOE<- zombies$years_of_education
-YOE
 YOE_pop_v <- function(YOE){sum((YOE-mean(YOE))^2)/(length(YOE))}
 YOE_pop_v(YOE) #2.8080
 
@@ -103,9 +97,9 @@ YOE_pop_sd <- function(YOE){sqrt(YOE_pop_v(YOE))}
 YOE_pop_sd(YOE) #1.6757
 ```
 
-#QUESTION 2:
+### QUESTION 2:
 
->Use {ggplot} to make boxplots of each of these variables by gender.
+> Use {ggplot} to make boxplots of each of these variables by gender.
 
 This is for HEIGHT
 ```{r}
@@ -156,9 +150,9 @@ YOE_boxplot<- YOE_boxplot + geom_boxplot() + ylab("Years of Education")
 YOE_boxplot
 ```
 
-#QUESTION 3:
+### QUESTION 3:
 
->Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+> Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
 
 This is for HEIGHT
 ```{r}
@@ -195,9 +189,9 @@ Height_age_plot
 #There seems to be more of a positive correlation between age and height than between age and weight, even though you do see a slight positive relationship there as well 
 ```
 
-#QUESTION 4:
+### QUESTION 4:
 
->Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+> Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
 
 ```{r}
 attach(zombies)
@@ -226,16 +220,16 @@ hist(years_of_education, freq= FALSE) #Not a normal distribution
 #I think that the number of zombies killed and the years of education are drawn from a Poisson Distribution because they are both open ended counts of independently occuring events over a given period of time
 ```
 
-#QUESTION 5: 
+### QUESTION 5: 
 
->Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+> Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
 
 Creating my subset
 ```{r}
 set.seed(1) #using set.seed so that every time you run this function you'll get the same sample of numbers
 n <- 30 # size of the sample
 s <- zombies[sample(nrow(zombies), n, replace = FALSE),] #If i don't use nrow(zombies), then R gives back an error that it "can't take a sample larger than the population when replace= False"
-s
+head(s)
 ```
 
 Finding the sample means of each variable
@@ -277,8 +271,7 @@ sd_YOE #1.6914
 
 Finding standard error for each variable
 ```{r}
-install.packages("sciplot") #This package has the built in function se() for standard error
-library(sciplot)
+library(sciplot) #This package has the built in function se() for standard error
 
 se_height<- se(s$height)
 se_height #0.6819
@@ -314,7 +307,7 @@ ci_age <- c(lower_age,upper_age)
 ci_age #18.79751, 20.57562
 ```
 
-Constructing 95& CI for variables not normally distributed
+Constructing 95% CI for variables not normally distributed
 ```{r}
 #Since they are not normally distributed, we need to use bootstrapping
 library(boot)
@@ -346,9 +339,9 @@ boot.ci(results_YOE, type=c("norm", "basic", "perc", "bca"))
 #95% CI = 2.352, 3.580
 ```
 
-#QUESTION 6:
+### QUESTION 6:
 
->Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+> Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
 Drawing 99 random samples
 ```{r}
@@ -360,7 +353,6 @@ for (i in 1:k){
     s2[[i]] <- sample(zombies,size=n, replace=TRUE) #I think we have to set replace to TRUE because     30 x 99= 2970 and "zombies" df only has 1000 rows
 }
 summary(s2)
-head(s2)
 ```
 
 Trying to calculate the mean of each variable
@@ -380,31 +372,26 @@ Now adding these new means with the mean from my first sample I drew before to f
 ```{r}
 #for weight
 v<- c(a,s_weight_mean)
-v
 new_weight_mean<- mean(v)
 new_weight_mean #143.0806
 
 #for age
 w<- c(b,s_age_mean)
-w
 new_age_mean<- mean(w)
 new_age_mean #19.86678
 
 #for height
 x<- c(c,s_height_mean)
-x
 new_height_mean<- mean(x)
 new_height_mean #67.25766
 
 #for zombies killed
 y<- c(d,s_zombieskilled_mean)
-y
 new_ZK_mean<- mean(y)
 new_ZK_mean #3.02933
 
 #for Years of Education
 z<- c(e,s_YOE_mean)
-z
 new_YOE_mean<- mean(z)
 new_YOE_mean #2.98133
 ```
@@ -429,24 +416,26 @@ new_sd_YOE #1.676543
 
 Plotting the different varibales from my new 99 samples to see their distribution
 ```{r}
-qqnorm(s2[[1]]$weight)
-qqline(s2[[1]]$weight) #normal dist
+#qqnorm(s2[[1]]$weight)
+#qqline(s2[[1]]$weight) #normal dist
 
-qqnorm(s2[[1]]$age)
-qqline(s2[[1]]$age) #normal dist
+#qqnorm(s2[[1]]$age)
+#qqline(s2[[1]]$age) #normal dist
 
-qqnorm(s2[[1]]$height)
-qqline(s2[[1]]$height) #normal dist
+#qqnorm(s2[[1]]$height)
+#qqline(s2[[1]]$height) #normal dist
 
-qqnorm(s2[[1]]$zombies_killed) #Still not normally distributed...
-qqline(s2[[1]]$zombies_killed)
+#qqnorm(s2[[1]]$zombies_killed) #Still not normally distributed...
+#qqline(s2[[1]]$zombies_killed)
 
-qqnorm(s2[[1]]$years_of_education) #Still not normally distributed...
-qqline(s2[[1]]$years_of_education)
+#qqnorm(s2[[1]]$years_of_education) #Still not normally distributed...
+#qqline(s2[[1]]$years_of_education)
+
+#This gave me issues with knitting so I put it in #s
 ```
 
 
-#My challenges
+## My challenges
 
 1. Question 6 --> So I feel decently confident with how to pulled out my 99 samples using bootstrapping but then I didn't know if the way I calculated the means of each of the variables was right (See lines 368-376). Then I had no idea how to add in the means for each variable from the first sample that we made earlier on in the hw to get the total of 100 means (I don't think how I did it is right). Lastly, how do you get the standard deviations of a mean value.. R kept giving me an "NA" so I just did standard deviations of the entire variable (not the mean). Basically, this whole problem just confused me.
 2. Question 5 --> I wasn't sure how to set up the code for calculating CI for the variables with non-normal distribution so that took some fiddling, but after some onling searching I think I got it
